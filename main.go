@@ -13,7 +13,7 @@ import (
 	"github.com/klvfn/todos-clean-code/config"
 	"github.com/klvfn/todos-clean-code/middleware"
 	"github.com/klvfn/todos-clean-code/pkg/todo/delivery/http"
-	"github.com/klvfn/todos-clean-code/pkg/todo/repository/redis"
+	"github.com/klvfn/todos-clean-code/pkg/todo/repository/mysql"
 	"github.com/klvfn/todos-clean-code/pkg/todo/service"
 	"github.com/subosito/gotenv"
 )
@@ -36,10 +36,10 @@ func main() {
 	// Init root router
 	v1 := f.Group("/v1")
 
-	// Init dependencies
-	rdb, err := config.ConnectRedis()
+	// Init database
+	mysqlDB, err := config.ConnectMysql()
 	if err != nil {
-		log.Fatal("Error connect to redis")
+		log.Fatal("Failed connect to mysql, Error: ", err.Error())
 	}
 
 	// Init context
@@ -53,8 +53,8 @@ func main() {
 	ctxTimeoutInSecond := time.Duration(contextTimeout) * time.Second
 
 	// Modules todo
-	redisTodoRepo := redis.NewTodoRepository(rdb)
-	todoService := service.NewTodoService(redisTodoRepo, ctxTimeoutInSecond)
+	mysqlTodoRepo := mysql.NewTodoRepository(mysqlDB)
+	todoService := service.NewTodoService(mysqlTodoRepo, ctxTimeoutInSecond)
 	http.InitTodoHandler(f, todoService, v1)
 
 	log.Printf("Context Timeout: %ds\n", contextTimeout)

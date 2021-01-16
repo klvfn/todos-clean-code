@@ -2,8 +2,9 @@ package http
 
 import (
 	"context"
-	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/klvfn/todos-clean-code/helper"
@@ -87,11 +88,11 @@ func (th TodoHandler) GetByID(c *fiber.Ctx) error {
 	response := miscEntity.Response{}
 	response.Data = fiber.Map{}
 	response.Error = fiber.Map{}
-	id := c.Params("id")
+	id := strings.Trim(c.Params("id"), " ")
+	id64, _ := strconv.ParseInt(id, 10, 64)
 
-	todo, err := th.TodoService.GetByID(ctx, id)
+	todo, err := th.TodoService.GetByID(ctx, id64)
 	if err != nil {
-		log.Println(err.Error())
 		response.Error = helper.ConstructErrorResponse(http.StatusBadRequest, "Todo not found")
 		response.Message = "failed"
 		c.Status(http.StatusBadRequest)
@@ -110,9 +111,10 @@ func (th TodoHandler) Delete(c *fiber.Ctx) error {
 	response := miscEntity.Response{}
 	response.Error = fiber.Map{}
 	response.Data = fiber.Map{}
-	id := c.Params("id")
+	id := strings.Trim(c.Params("id"), " ")
+	id64, _ := strconv.ParseInt(id, 10, 64)
 
-	err := th.TodoService.Delete(ctx, id)
+	err := th.TodoService.Delete(ctx, id64)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusInternalServerError, "Delete todo failed")
 		response.Message = "failed"
@@ -129,7 +131,8 @@ func (th TodoHandler) Delete(c *fiber.Ctx) error {
 func (th TodoHandler) Update(c *fiber.Ctx) error {
 	ctx := context.Background()
 	payload := todoEntity.Todo{}
-	id := c.Params("id")
+	id := strings.Trim(c.Params("id"), " ")
+	id64, _ := strconv.ParseInt(id, 10, 64)
 	response := miscEntity.Response{}
 	response.Error = fiber.Map{}
 	response.Data = fiber.Map{}
@@ -143,7 +146,7 @@ func (th TodoHandler) Update(c *fiber.Ctx) error {
 	}
 
 	// Check first whether todo exist or not
-	_, err = th.TodoService.GetByID(ctx, id)
+	_, err = th.TodoService.GetByID(ctx, id64)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusBadRequest, "Todo not found, cannot be update")
 		response.Message = "failed"
@@ -151,8 +154,8 @@ func (th TodoHandler) Update(c *fiber.Ctx) error {
 		return c.JSON(response)
 	}
 
-	payload.ID = id
-	err = th.TodoService.Update(ctx, id, payload)
+	payload.ID = id64
+	err = th.TodoService.Update(ctx, id64, payload)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusInternalServerError, "Update todo failed")
 		response.Message = "failed"
