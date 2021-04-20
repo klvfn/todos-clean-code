@@ -24,7 +24,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: pass
     ports:
-      - 3306:3306
+      - 8080:3306
     volumes:
         - ./todos.sql:/docker-entrypoint-initdb.d/init.sql
   
