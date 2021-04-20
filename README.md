@@ -2,6 +2,15 @@
 
 Trying to create a simple todos API using Go Clean Architecture
 
+## How to run
+
+- Create .env file
+- Run this command on your terminal (make sure you have docker-compose installed)
+    ```bash
+    docker-compose up -d --build api
+    ```
+- Wait a sec, api container will restart few times until it can be connected to db
+- Done you're ready to go :rocket:
 ## Resources
 
 List of resources that are used as a guidance:
