@@ -21,8 +21,6 @@ services:
     environment:
       TZ: Asia/Jakarta
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: user
-      MYSQL_PASSWORD: pass
     ports:
       - 8080:3306
     volumes:
