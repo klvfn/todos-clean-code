@@ -1,0 +1,10 @@
+{
+    "app_port": 3030,
+    "mysql": {
+        "host": "db",
+        "port": 3306,
+        "db": "todos",
+        "user": "root",
+        "pass": "root"
+    }
+}

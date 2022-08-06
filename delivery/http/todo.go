@@ -1,29 +1,26 @@
 package http
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/klvfn/todos-clean-code/entity"
 	"github.com/klvfn/todos-clean-code/helper"
-	miscEntity "github.com/klvfn/todos-clean-code/pkg/misc/entity"
-	todoEntity "github.com/klvfn/todos-clean-code/pkg/todo/entity"
-	"github.com/klvfn/todos-clean-code/pkg/todo/service"
+	"github.com/klvfn/todos-clean-code/service"
 )
 
 // TodoHandler represent http handler for todo
 type TodoHandler struct {
-	TodoService service.TodoService
+	service *service.Service
 }
 
-// InitTodoHandler create new instance of todo handler
-func InitTodoHandler(f *fiber.App, todoService service.TodoService, rootRouter fiber.Router) {
+// NewTodoHandler create new instance of todo handler
+func NewTodoHandler(f *fiber.App, svc *service.Service, rootRouter fiber.Router) {
 	handler := &TodoHandler{
-		TodoService: todoService,
+		service: svc,
 	}
-
 	todo := rootRouter.Group("/todo")
 	todo.Get("/", handler.GetAll)
 	todo.Post("/", handler.Create)
@@ -33,13 +30,11 @@ func InitTodoHandler(f *fiber.App, todoService service.TodoService, rootRouter f
 }
 
 // GetAll retrieve all todo
-func (th TodoHandler) GetAll(c *fiber.Ctx) error {
-	ctx := context.Background()
-	response := miscEntity.Response{}
+func (h TodoHandler) GetAll(c *fiber.Ctx) error {
+	response := entity.Response{}
 	response.Data = fiber.Map{}
-	response.Error = fiber.Map{}
 
-	todos, err := th.TodoService.GetAll(ctx)
+	todos, err := h.service.Todo.GetAll()
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusNotFound, "Failed get todos")
 		response.Message = "failed"
@@ -54,11 +49,9 @@ func (th TodoHandler) GetAll(c *fiber.Ctx) error {
 }
 
 // Create post a new todo
-func (th TodoHandler) Create(c *fiber.Ctx) error {
-	ctx := context.Background()
-	payload := todoEntity.Todo{}
-	response := miscEntity.Response{}
-	response.Error = fiber.Map{}
+func (h TodoHandler) Create(c *fiber.Ctx) error {
+	payload := entity.Todo{}
+	response := entity.Response{}
 	response.Data = fiber.Map{}
 
 	err := c.BodyParser(&payload)
@@ -69,7 +62,7 @@ func (th TodoHandler) Create(c *fiber.Ctx) error {
 		return c.JSON(response)
 	}
 
-	id, err := th.TodoService.Create(ctx, payload)
+	id, err := h.service.Todo.Create(payload)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusInternalServerError, "Create todo failed")
 		response.Message = "failed"
@@ -83,15 +76,13 @@ func (th TodoHandler) Create(c *fiber.Ctx) error {
 }
 
 // GetByID get todo by id
-func (th TodoHandler) GetByID(c *fiber.Ctx) error {
-	ctx := context.Background()
-	response := miscEntity.Response{}
+func (h TodoHandler) GetByID(c *fiber.Ctx) error {
+	response := entity.Response{}
 	response.Data = fiber.Map{}
-	response.Error = fiber.Map{}
 	id := strings.Trim(c.Params("id"), " ")
 	id64, _ := strconv.ParseInt(id, 10, 64)
 
-	todo, err := th.TodoService.GetByID(ctx, id64)
+	todo, err := h.service.Todo.GetByID(id64)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusBadRequest, "Todo not found")
 		response.Message = "failed"
@@ -106,15 +97,13 @@ func (th TodoHandler) GetByID(c *fiber.Ctx) error {
 }
 
 // Delete a todo
-func (th TodoHandler) Delete(c *fiber.Ctx) error {
-	ctx := context.Background()
-	response := miscEntity.Response{}
-	response.Error = fiber.Map{}
+func (h TodoHandler) Delete(c *fiber.Ctx) error {
+	response := entity.Response{}
 	response.Data = fiber.Map{}
 	id := strings.Trim(c.Params("id"), " ")
 	id64, _ := strconv.ParseInt(id, 10, 64)
 
-	err := th.TodoService.Delete(ctx, id64)
+	err := h.service.Todo.Delete(id64)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusInternalServerError, "Delete todo failed")
 		response.Message = "failed"
@@ -128,13 +117,11 @@ func (th TodoHandler) Delete(c *fiber.Ctx) error {
 }
 
 // Update a todo
-func (th TodoHandler) Update(c *fiber.Ctx) error {
-	ctx := context.Background()
-	payload := todoEntity.Todo{}
+func (h TodoHandler) Update(c *fiber.Ctx) error {
+	payload := entity.Todo{}
 	id := strings.Trim(c.Params("id"), " ")
 	id64, _ := strconv.ParseInt(id, 10, 64)
-	response := miscEntity.Response{}
-	response.Error = fiber.Map{}
+	response := entity.Response{}
 	response.Data = fiber.Map{}
 
 	err := c.BodyParser(&payload)
@@ -146,7 +133,7 @@ func (th TodoHandler) Update(c *fiber.Ctx) error {
 	}
 
 	// Check first whether todo exist or not
-	_, err = th.TodoService.GetByID(ctx, id64)
+	_, err = h.service.Todo.GetByID(id64)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusBadRequest, "Todo not found, cannot be update")
 		response.Message = "failed"
@@ -155,7 +142,7 @@ func (th TodoHandler) Update(c *fiber.Ctx) error {
 	}
 
 	payload.ID = id64
-	err = th.TodoService.Update(ctx, id64, payload)
+	err = h.service.Todo.Update(id64, payload)
 	if err != nil {
 		response.Error = helper.ConstructErrorResponse(http.StatusInternalServerError, "Update todo failed")
 		response.Message = "failed"

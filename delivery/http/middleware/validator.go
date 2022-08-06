@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/klvfn/todos-clean-code/entity"
 	"github.com/klvfn/todos-clean-code/helper"
-	"github.com/klvfn/todos-clean-code/pkg/misc/entity"
 )
 
 // ValidateContentType check content type should by only application/json

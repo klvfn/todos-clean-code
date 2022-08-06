@@ -3,7 +3,7 @@ package helper
 import (
 	"net/http"
 
-	"github.com/klvfn/todos-clean-code/pkg/misc/entity"
+	"github.com/klvfn/todos-clean-code/entity"
 )
 
 // ConstructErrorResponse produce a new error response
