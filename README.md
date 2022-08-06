@@ -1,4 +1,4 @@
-# Go Clean Architecture
+# 🌳 Go Clean Architecture
 
 Trying to create a simple todos API using Go Clean Architecture for learning purposes
 
@@ -11,7 +11,7 @@ Trying to create a simple todos API using Go Clean Architecture for learning pur
         ```
     -   Done you're ready to Go
 
-## 🗒️To Do List
+## 🗒️ To Do List
 
 -   [x] Restructure code
 -   [ ] Create unit test
